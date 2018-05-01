@@ -83,15 +83,15 @@ nodesjoin = 40
 n_group=4
 
 
-X_train1 =np.pad(X_train[:,[0,	1,	4,	5,	10,	11,	14,	21,	23,30 ,0,	1,	4,	5,	10,	11,	14,	21,	23,30,0,	1,	4,	5,	10,	11,	14,	21,	23,30,0,	1,	4,	5,	10,	11,	14,	21,	23,30 ]],  ((0,0),(0,0)), 'constant', constant_values=1).reshape([BATCH_SIZE*n_group,n_steps,nodes1/n_steps])
-X_train2 =np.pad(X_train[:,[15,	18,	24,	25,	26,	27,31,	32,	33,	35,15,	18,	24,	25,	26,	27,31,	32,	33,	35,15,	18,	24,	25,	26,	27,31,	32,	33,	35,15,	18,	24,	25,	26,	27,31,	32,	33,	35]], ((0,0),(0,0)), 'constant', constant_values=1).reshape([BATCH_SIZE*n_group,n_steps,nodes2/n_steps])
-X_train3 =np.pad(X_train[:,[6,	7,	8,	9,	12,	13,	17,	29,32,	38,6,	7,	8,	9,	12,	13,	17,	29,32,	38,6,	7,	8,	9,	12,	13,	17,	29,32,	38,6,	7,	8,	9,	12,	13,	17,	29,32,	38]], ((0,0),(0,0)), 'constant', constant_values=1).reshape([BATCH_SIZE*n_group,n_steps,nodes3/n_steps])
+X_train1 =np.pad(X_train[:,[0,	1,	4,	5,	10,	11,	14,	21,	23, 30 ]],  ((0,0),(0,0)), 'constant', constant_values=1).reshape([BATCH_SIZE*n_group,n_steps,nodes1/n_steps])
+X_train2 =np.pad(X_train[:,[15,	18,	24,	25,	26,	27,31,	32,	33,	35]], ((0,0),(0,0)), 'constant', constant_values=1).reshape([BATCH_SIZE*n_group,n_steps,nodes2/n_steps])
+X_train3 =np.pad(X_train[:,[6,	7,	8,	9,	12,	13,	17,	29, 32,	38]], ((0,0),(0,0)), 'constant', constant_values=1).reshape([BATCH_SIZE*n_group,n_steps,nodes3/n_steps])
 X_train =X_train.reshape([BATCH_SIZE*n_group,n_steps,no_fea/n_steps])
 
 
-X_test1 =np.pad(X_test[:,[0,	1,	4,	5,	10,	11,	14,	21,	23,30,0,	1,	4,	5,	10,	11,	14,	21,	23,30,0,	1,	4,	5,	10,	11,	14,	21,	23,30,0,	1,	4,	5,	10,	11,	14,	21,	23,30]],  ((0,0),(0,0)), 'constant', constant_values=1).reshape([BATCH_SIZE,n_steps,nodes1/n_steps])
-X_test2 =np.pad(X_test[:,[15,	18,	24,	25,	26,	27,	32,	33,	35,35,15,	18,	24,	25,	26,	27,	32,	33,	35,35,15,	18,	24,	25,	26,	27,	32,	33,	35,35,15,	18,	24,	25,	26,	27,	32,	33,	35,35]], ((0,0),(0,0)), 'constant', constant_values=1).reshape([BATCH_SIZE,n_steps,nodes2/n_steps])
-X_test3 =np.pad(X_test[:,[6,	7,	8,	9,	12,	13,	17,	29,32,	38,6,	7,	8,	9,	12,	13,	17,	29,32,	38,6,	7,	8,	9,	12,	13,	17,	29,32,	38,6,	7,	8,	9,	12,	13,	17,	29,32,	38]], ((0,0),(0,0)), 'constant', constant_values=1).reshape([BATCH_SIZE,n_steps,nodes3/n_steps])
+X_test1 =np.pad(X_test[:,[0,	1,	4,	5,	10,	11,	14,	21,	23, 30]],  ((0,0),(0,0)), 'constant', constant_values=1).reshape([BATCH_SIZE,n_steps,nodes1/n_steps])
+X_test2 =np.pad(X_test[:,[15,	18,	24,	25,	26,	27,	32,	33,	35, 35]], ((0,0),(0,0)), 'constant', constant_values=1).reshape([BATCH_SIZE,n_steps,nodes2/n_steps])
+X_test3 =np.pad(X_test[:,[6,	7,	8,	9,	12,	13,	17,	29, 32, 38]], ((0,0),(0,0)), 'constant', constant_values=1).reshape([BATCH_SIZE,n_steps,nodes3/n_steps])
 X_test =X_test.reshape([BATCH_SIZE,n_steps,no_fea/n_steps])
 
 train_fea =[]
@@ -244,9 +244,7 @@ def RNN(xjoin, x1, x2, x3, weights, biases, keep_prob ):#:x4, x5, x6, weights, b
 	X1 = tf.reshape(x1, [-1, n_inputs])
 	X2 = tf.reshape(x2, [-1, n_inputs])
 	X3 = tf.reshape(x3, [-1, n_inputs])
-#	X4 = tf.reshape(x4, [-1, n_inputs])
-#	X5 = tf.reshape(x5, [-1, n_inputs])
-#	X6 = tf.reshape(x6, [-1, n_inputs])
+
 
     # into hidden
     # X_in = (128 batch * 28 steps, 128 hidden)
