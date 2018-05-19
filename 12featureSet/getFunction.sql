@@ -1,20 +1,21 @@
-﻿set search_path to mimic3;
+set search_path to mimic3;
 --- get the feature out base on the required time interval
+DROP FUNCTION get_pvt_sofa(bigint,integer);
 create or replace function get_pvt_sofa(icustay_id bigint, time_window integer)
 	returns table (
 	TW_hour_idx double precision, 
-    ABP_mean double precision,
-    Bilirubin double precision, 
-    CREATININE double precision,
-    Dobutamine double precision,
-    Dopamine double precision,
-    Epinephrine double precision,   
-    FiO2 double precision,
-    GCS double precision,
-    Norepinephrine double precision,
-    PaO2 double precision,
-    Platelets double precision,
-    URINE double precision	
+	ABP_mean double precision,
+	Bilirubin double precision, 
+	CREATININE double precision,
+	Dobutamine double precision,
+	Dopamine double precision,
+	Epinephrine double precision,   
+	FiO2 double precision,
+	GCS double precision,
+	Norepinephrine double precision,
+	PaO2 double precision,
+	Platelets double precision,
+	URINE double precision	
 	) 
 as $$
 declare
@@ -38,13 +39,19 @@ begin
 	return query select *
 	from crosstab(qtext, 'select lower(item_cat) from d_sofa_vars order by item_cat')
 	as pvt(
-	TW_hour_idx double precision,     ABP_mean double precision,
-    Bilirubin double precision,     CREATININE double precision,
-    Dobutamine double precision,    Dopamine double precision,
-    Epinephrine double precision,    FiO2 double precision,
-    GCS double precision,    Norepinephrine double precision,
-    PaO2 double precision,    Platelets double precision,
-    URINE double precision	
+	TW_hour_idx double precision,     
+	ABP_mean double precision,
+	Bilirubin double precision,     
+	CREATININE double precision,
+	Dobutamine double precision,    
+	Dopamine double precision,
+	Epinephrine double precision,    
+	FiO2 double precision,
+	GCS double precision,    
+	Norepinephrine double precision,
+	PaO2 double precision,    
+	Platelets double precision,
+	URINE double precision	
 	);
 end;
 $$ language plpgsql;	
@@ -56,12 +63,12 @@ create or replace function get_locf_pvt_sofa(icustay_id bigint, time_window inte
 		abp_mean double precision,
 		bilirubin double precision,	
 		creatinine double precision,
-		dobutamine double precision, -- not to impute
-		dopamine double precision, -- not to impute
-		epinephrine double precision,	-- not to impute
+		dobutamine double precision,		-- not to impute
+		dopamine double precision,		-- not to impute
+		epinephrine double precision,		-- not to impute
 		fio2 double precision,
 		gcs double precision,
-		norepinephrine double precision,  -- not to impute
+		norepinephrine double precision,	-- not to impute
 		pao2 double precision,
 		platelets double precision,
 		urine double precision
@@ -201,8 +208,147 @@ begin
 
 end;
 $$ language plpgsql;
+DROP FUNCTION get_mask_sofa(icustay_id bigint, time_window integer);
+create or replace function get_mask_sofa(icustay_id bigint, time_window integer)
+	returns table (
+	TW_hour_idx double precision, 
+    ABP_mean int,
+    Bilirubin int, 
+    CREATININE int,
+    Dobutamine int,
+    Dopamine int,
+    Epinephrine int,
+    FiO2 int,
+    GCS int,
+    Norepinephrine int,
+    PaO2 int,
+    Platelets int,
+    URINE int
+	) 
+as $$
+begin
+	return query
+	select pvt_sofa.tw_hour_idx,
+	CASE WHEN pvt_sofa.ABP_mean IS NOT NULL 
+		THEN 1
+		ELSE 0
+	END ABP_mean,
+	CASE WHEN pvt_sofa.Bilirubin IS NOT NULL 
+		THEN 1
+		ELSE 0
+	END Bilirubin,
+	CASE WHEN pvt_sofa.CREATININE IS NOT NULL 
+		THEN 1
+		ELSE 0
+	END Bilirubin,
+	CASE WHEN pvt_sofa.Dobutamine IS NOT NULL 
+		THEN 1
+		ELSE 0
+	END Dobutamine,
+	CASE WHEN pvt_sofa.Dopamine IS NOT NULL 
+		THEN 1
+		ELSE 0
+	END Dopamine,
+	CASE WHEN pvt_sofa.Epinephrine IS NOT NULL 
+		THEN 1
+		ELSE 0
+	END Epinephrine,
+	CASE WHEN pvt_sofa.FiO2 IS NOT NULL 
+		THEN 1
+		ELSE 0
+	END FiO2 ,
+	CASE WHEN pvt_sofa.GCS IS NOT NULL 
+		THEN 1
+		ELSE 0
+	END GCS,
+	CASE WHEN pvt_sofa.Norepinephrine IS NOT NULL 
+		THEN 1
+		ELSE 0
+	END Norepinephrine,
+	CASE WHEN pvt_sofa.PaO2 IS NOT NULL 
+		THEN 1
+		ELSE 0
+	END PaO2,
+	CASE WHEN pvt_sofa.Platelets IS NOT NULL 
+		THEN 1
+		ELSE 0
+	END Platelets,
+	CASE WHEN pvt_sofa.URINE IS NOT NULL 
+		THEN 1
+		ELSE 0
+	END URINE
+	from get_pvt_sofa($1,$2) as pvt_sofa;
+end;
+$$ language plpgsql;
+--drop function get_feature(icustay_id bigint, time_window integer);
+create or replace function get_feature(icustay_id bigint, time_window integer)
+	returns table (
+		tw_hour_idx double precision,
+		total_sofa_score int,
+		abp_mean double precision,
+		bilirubin double precision,	
+		creatinine double precision,
+		dobutamine double precision, 
+		dopamine double precision, 
+		epinephrine double precision,	
+		fio2 double precision,
+		gcs double precision,
+		norepinephrine double precision,  
+		pao2 double precision,
+		platelets double precision,
+		urine double precision,
+		m_ABP_mean int,
+		m_Bilirubin int, 
+		m_CREATININE int,
+		m_Dobutamine int,
+		m_Dopamine int,
+		m_Epinephrine int,
+		m_FiO2 int,
+		m_GCS int,
+		m_Norepinephrine int,
+		m_PaO2 int,
+		m_Platelets int,
+		m_URINE int
+		)
+as $$
+begin
+return query
+	select s.tw_hour_idx,
+		s.total_sofa_score,
+		f.abp_mean,
+		f.bilirubin,	
+		f.creatinine,
+		f.dobutamine, 
+		f.dopamine, 
+		f.epinephrine,	
+		f.fio2,
+		f.gcs,
+		f.norepinephrine,  
+		f.pao2,
+		f.platelets,
+		f.urine,
+		m.ABP_mean,
+		m.Bilirubin, 
+		m.CREATININE,
+		m.Dobutamine,
+		m.Dopamine,
+		m.Epinephrine,
+		m.FiO2,
+		m.GCS,
+		m.Norepinephrine,
+		m.PaO2,
+		m.Platelets,
+		m.URINE
+		from get_locf_pvt_sofa($1,$2) as f,
+		     get_mask_sofa($1,$2) as m,
+		     get_score_locf_pvt_sofa($1,$2) as s
+		where s.tw_hour_idx= m.tw_hour_idx and s.tw_hour_idx=f.tw_hour_idx;
+end;
+$$ language plpgsql;
 
+--select * from get_mask_sofa(261176,1)
+--select * from get_pvt_sofa(261176,1)
+--select * from get_locf_pvt_sofa(261176,1)
+--select * from get_score_locf_pvt_sofa(261176,1)
 
-select * from get_pvt_sofa(261176,1)
-select * from get_locf_pvt_sofa(261176,1)
-select * from get_score_locf_pvt_sofa(261176,1)
+select * from get_feature(280857,1)
